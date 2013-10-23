@@ -3,26 +3,34 @@ from pygame.locals import *
 
 import conf
 from level import Level
+from player.mario import Mario
 
 
 class App:
+    WIN_SIZE = conf.WIN_SIZE
+
     def __init__(self):
         self._running = True
         self._display_surf = None
-        self.size = self.weight, self.height = 1024, 800
 
         self.level = None
+        self.player = None
 
     def on_init(self):
         pg.init()
+        pg.display.set_caption("PyMario")
+
         self._display_surf = pg.display.set_mode(
-            self.size,
+            self.WIN_SIZE,
             pg.HWSURFACE | pg.DOUBLEBUF
         )
         self._running = True
         
-        # initialize level
+        # create level
         self.level = Level(self._display_surf)
+
+        # create player
+        self.player = Mario(self._display_surf, 100, 100)
 
     def on_execute(self):
         if self.on_init() == False:
@@ -45,14 +53,14 @@ class App:
         pass
 
     def on_render(self):
-
+        # render level
         self.level.render()
+        self.player.render()
 
-        pass
+        pg.display.update()
 
     def on_cleanup(self):
         pg.quit()
-
 
 
 if __name__ == "__main__":
