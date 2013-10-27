@@ -40,12 +40,13 @@ class Level(object):
        "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
     ]
 
-    def __init__(self, surface):
-        self._bg = None
-        self._elements = pg.sprite.Group()
-
+    def __init__(self, surface, camera):
         # surface (main screen)
         self._surface = surface
+        self._camera = camera
+
+        self._bg = None
+        self._elements = pg.sprite.Group()
 
         # load sprite sheet
         #self._sprite_sheet = pg.image.load(conf.MEDIA_PATH + 'sheets/mario.gif').convert()
@@ -87,7 +88,8 @@ class Level(object):
         self._surface.blit(self._bg, (0, 0))
 
         # draw entities
-        self._elements.draw(self._surface)
+        for e in self._elements:
+            self._surface.blit(e.image, self._camera.apply(e))
 
     def get_elements(self):
         return self._elements

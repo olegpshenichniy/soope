@@ -20,6 +20,9 @@ class Mario(pg.sprite.Sprite):
     JUMP_EXTRA_POWER = 20
     GRAVITY = 0.35
 
+    # EVENTS
+    AVAILABLE_EVENTS = ('left', 'right', 'up', 'running')
+
     # ANIMATION #
 
     ANIMATION_DELAY = 0.1
@@ -40,8 +43,9 @@ class Mario(pg.sprite.Sprite):
     ANIMATION_JUMP = [('{0}/player/mario/j.png'.format(MEDIA_PATH), 0.1)]
     ANIMATION_STAY = [('{0}/player/mario/0.png'.format(MEDIA_PATH), 0.1)]
 
-    def __init__(self, surface, x, y):
+    def __init__(self, x, y, surface, camera):
         self._surface = surface
+        self._camera = camera
 
         pg.sprite.Sprite.__init__(self)
 
@@ -49,10 +53,12 @@ class Mario(pg.sprite.Sprite):
         self.yvel = 0
         self.on_ground = False
 
+        # create events dict
+        self.events = {e: None for e in self.AVAILABLE_EVENTS}
+
         # start position
         self.startX = x
         self.startY = y
-
 
         self.image = pg.Surface((self.WIDTH, self.HEIGHT))
         self.image.fill(pg.Color(self.COLOR))
@@ -60,13 +66,10 @@ class Mario(pg.sprite.Sprite):
         # make image transparent
         self.image.set_colorkey(pg.Color(self.COLOR))
 
-
         # object rectangle
         self.rect = pg.Rect(x, y, self.WIDTH, self.HEIGHT)
 
-
-        #ANIMATION
-
+        # ANIMATION #
         self.boltAnimStay = pyganim.PygAnimation(self.ANIMATION_STAY)
         self.boltAnimStay.play()
 
@@ -120,63 +123,7 @@ class Mario(pg.sprite.Sprite):
 
     def render(self):
         # render
-        self._surface.blit(self.image, (self.rect.x, self.rect.y))
-
-    def update(self, left, right, up, running, platforms):
-
-        if up:
-            if self.on_ground:
-                self.yvel = -self.JUMP_POWER
-                # if running and move -> jump higher
-                if running and (left or right):
-                    self.yvel -= self.JUMP_EXTRA_POWER
-            self.image.fill(pg.Color(self.COLOR))
-            self.boltAnimJump.blit(self.image, (0, 0))
-
-        if left:
-            self.xvel = -self.MOVE_SPEED
-            self.image.fill(pg.Color(self.COLOR))
-            if running:
-                self.xvel -= self.MOVE_EXTRA_SPEED
-                if not up:
-                    self.boltAnimLeftSuperSpeed.blit(self.image, (0, 0))
-            else:
-                if not up:
-                    self.boltAnimLeft.blit(self.image, (0, 0))
-
-            if up:
-                self.boltAnimJumpLeft.blit(self.image, (0, 0))
-
-        if right:
-            self.xvel = self.MOVE_SPEED
-            self.image.fill(pg.Color(self.COLOR))
-            if running:
-                self.xvel += self.MOVE_EXTRA_SPEED
-                if not up:
-                    self.boltAnimRightSuperSpeed.blit(self.image, (0, 0))
-            else:
-                if not up:
-                    self.boltAnimRight.blit(self.image, (0, 0))
-
-            if up:
-                self.boltAnimJumpRight.blit(self.image, (0, 0))
-
-        if not (left or right):
-            self.xvel = 0
-            if not up:
-                self.image.fill(pg.Color(self.COLOR))
-                self.boltAnimStay.blit(self.image, (0, 0))
-
-        # move rect object
-        if not self.on_ground:
-            self.yvel += self.GRAVITY
-        self.on_ground = False
-
-        self.rect.y += self.yvel
-        self.collide(0, self.yvel, platforms)
-
-        self.rect.x += self.xvel
-        self.collide(self.xvel, 0, platforms)
+        self._surface.blit(self.image, self._camera.apply(self))
 
     def collide(self, xvel, yvel, level_elements):
         for elem in level_elements:
@@ -221,9 +168,98 @@ class Mario(pg.sprite.Sprite):
                 #if hasattr(p, 'player_action'):
                 #    p.player_action(self)
 
-    def listent_event(self, event):
-        print event
+    def listent_event(self, event, joystick=None):
 
+        print 'event : ' + str(event.type)
+
+        if joystick:
+            if event.type == pg.locals.JOYAXISMOTION:
+                x, y = joystick.get_axis(0), joystick.get_axis(1)
+                print 'x and y : ' + str(x) + ' , ' + str(y)
+            elif event.type == pg.locals.JOYBALLMOTION:
+                print 'ball motion'
+            elif event.type == pg.locals.JOYHATMOTION:
+                print 'hat motion'
+            elif event.type == pg.locals.JOYBUTTONDOWN:
+                print 'button down'
+            elif event.type == pg.locals.JOYBUTTONUP:
+                print 'button up'
+
+        if event.type == pg.KEYDOWN and event.key == pg.K_LEFT:
+            self.events['left'] = True
+        if event.type == pg.KEYDOWN and event.key == pg.K_RIGHT:
+            self.events['right'] = True
+
+        if event.type == pg.KEYUP and event.key == pg.K_RIGHT:
+            self.events['right'] = False
+        if event.type == pg.KEYUP and event.key == pg.K_LEFT:
+            self.events['left'] = False
+
+        if event.type == pg.KEYDOWN and event.key == pg.K_UP:
+            self.events['up'] = True
+        if event.type == pg.KEYUP and event.key == pg.K_UP:
+            self.events['up'] = False
+
+        if event.type == pg.KEYDOWN and event.key == pg.K_LSHIFT:
+            self.events['running'] = True
+        if event.type == pg.KEYUP and event.key == pg.K_LSHIFT:
+            self.events['running'] = False
+
+    def update(self, platforms):
+
+        if self.events['up']:
+            if self.on_ground:
+                self.yvel = -self.JUMP_POWER
+                # if running and move -> jump higher
+                if self.events['running'] and (self.events['left'] or self.events['right']):
+                    self.yvel -= self.JUMP_EXTRA_POWER
+            self.image.fill(pg.Color(self.COLOR))
+            self.boltAnimJump.blit(self.image, (0, 0))
+
+        if self.events['left']:
+            self.xvel = -self.MOVE_SPEED
+            self.image.fill(pg.Color(self.COLOR))
+            if self.events['running']:
+                self.xvel -= self.MOVE_EXTRA_SPEED
+                if not self.events['up']:
+                    self.boltAnimLeftSuperSpeed.blit(self.image, (0, 0))
+            else:
+                if not self.events['up']:
+                    self.boltAnimLeft.blit(self.image, (0, 0))
+
+            if self.events['up']:
+                self.boltAnimJumpLeft.blit(self.image, (0, 0))
+
+        if self.events['right']:
+            self.xvel = self.MOVE_SPEED
+            self.image.fill(pg.Color(self.COLOR))
+            if self.events['running']:
+                self.xvel += self.MOVE_EXTRA_SPEED
+                if not self.events['up']:
+                    self.boltAnimRightSuperSpeed.blit(self.image, (0, 0))
+            else:
+                if not self.events['up']:
+                    self.boltAnimRight.blit(self.image, (0, 0))
+
+            if self.events['up']:
+                self.boltAnimJumpRight.blit(self.image, (0, 0))
+
+        if not (self.events['left'] or self.events['right']):
+            self.xvel = 0
+            if not self.events['up']:
+                self.image.fill(pg.Color(self.COLOR))
+                self.boltAnimStay.blit(self.image, (0, 0))
+
+        # move rect object
+        if not self.on_ground:
+            self.yvel += self.GRAVITY
+        self.on_ground = False
+
+        self.rect.y += self.yvel
+        self.collide(0, self.yvel, platforms)
+
+        self.rect.x += self.xvel
+        self.collide(self.xvel, 0, platforms)
 
     #def die(self):
     #    pg.time.wait(500)

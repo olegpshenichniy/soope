@@ -1,7 +1,9 @@
+# -*- coding: utf-8 -*-
 import pygame as pg
 from pygame.locals import *
 
 import conf
+from camera import Camera
 from level import Level
 from player.mario import Mario
 
@@ -11,10 +13,22 @@ class App(object):
 
     def __init__(self):
         pg.init()
+
+        # joy stick
+        pg.joystick.init()
+        try:
+            self.joystick = pg.joystick.Joystick(0) # create a joystick instance
+            self.joystick.init() # init instance
+            print 'Enabled joystick: ' + self.joystick.get_name()
+        except pg.error:
+            print 'no joystick found.'
+            self.joystick = None
+
+
         self.timer = pg.time.Clock()
 
         self._running = True
-        self._display_surf = None
+        self.display_surf = None
 
         self.level = None
         self.player = None
@@ -22,17 +36,22 @@ class App(object):
     def on_init(self):
         pg.display.set_caption("PyMario")
 
-        self._display_surf = pg.display.set_mode(
+        self.display_surf = pg.display.set_mode(
             self.WIN_SIZE,
             pg.HWSURFACE | pg.DOUBLEBUF
         )
         self._running = True
 
+        # CAMERA
+        self.camera = Camera(level_width=len(Level.MAP[0]) * 30,
+                             level_height=len(Level.MAP) * 30)
+
         # create level
-        self.level = Level(self._display_surf)
+        self.level = Level(surface=self.display_surf, camera=self.camera)
 
         # create player
-        self.player = Mario(self._display_surf, 60, 60)
+        self.player = Mario(60, 60, surface=self.display_surf, camera=self.camera)
+
 
     def on_execute(self):
         if self.on_init() == False:
@@ -49,12 +68,14 @@ class App(object):
 
     def on_event(self, event):
         self._listent_event(event)
-        self.player.listent_event(event)
+        self.player.listent_event(event, joystick=self.joystick)
 
     def on_loop(self):
+        # center camera on player
+        self.camera.update(self.player)
+
         # update mario
-        self.player.update(False, False, False, False,
-                           self.level.get_elements())
+        self.player.update(self.level.get_elements())
 
     def on_render(self):
         # render level
