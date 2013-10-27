@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 import pygame as pg
+
 from soope.conf import MEDIA_PATH
+from element import ElementBase
 
 
-class Cloud(pg.sprite.Sprite):
+class Cloud(pg.sprite.Sprite, ElementBase):
     WIDTH = 128
     HEIGHT = 48
 

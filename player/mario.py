@@ -120,7 +120,7 @@ class Mario(pg.sprite.Sprite):
 
     def render(self):
         # render
-        self._surface.blit(self.image, (100, 100))
+        self._surface.blit(self.image, (self.rect.x, self.rect.y))
 
     def update(self, left, right, up, running, platforms):
 
@@ -173,53 +173,56 @@ class Mario(pg.sprite.Sprite):
         self.on_ground = False
 
         self.rect.y += self.yvel
-        #self.collide(0, self.yvel, platforms)
+        self.collide(0, self.yvel, platforms)
 
         self.rect.x += self.xvel
-        #self.collide(self.xvel, 0, platforms)
+        self.collide(self.xvel, 0, platforms)
 
-    #def collide(self, xvel, yvel, platforms):
-    #    for p in platforms:
-    #
-    #        # if user collide with platform
-    #        if pg.sprite.collide_rect(self, p):
-    #
-    #            # if move right
-    #            if xvel > 0:
-    #                # not move right
-    #                self.rect.right = p.rect.left
-    #
-    #            # if move left
-    #            if xvel < 0:
-    #                # not move left
-    #                self.rect.left = p.rect.right
-    #
-    #            # if fall down
-    #            if yvel > 0:
-    #                # stop fall down
-    #                self.rect.bottom = p.rect.top
-    #
-    #                # stay on ground
-    #                self.on_ground = True
-    #
-    #                # fall energy disappear
-    #                self.yvel = 0
-    #
-    #            # if move up
-    #            if yvel < 0:
-    #                # stop move up
-    #                self.rect.top = p.rect.bottom
-    #
-    #                # jump energy disappear
-    #                self.yvel = 0
-    #
-    #            ## bad block
-    #            #if isinstance(p, self.DeathBlock) or isinstance(p, self.Monster):
-    #            #    self.die()
-    #            #
-    #            ## move logik into block class
-    #            #if hasattr(p, 'player_action'):
-    #            #    p.player_action(self)
+    def collide(self, xvel, yvel, level_elements):
+        for elem in level_elements:
+
+            # if user collide with collideable elem
+            if elem.REACT_WITH_OTHER and pg.sprite.collide_rect(self, elem):
+
+                # if move right
+                if xvel > 0:
+                    # not move right
+                    self.rect.right = elem.rect.left
+
+                # if move left
+                if xvel < 0:
+                    # not move left
+                    self.rect.left = elem.rect.right
+
+                # if fall down
+                if yvel > 0:
+                    # stop fall down
+                    self.rect.bottom = elem.rect.top
+
+                    # stay on ground
+                    self.on_ground = True
+
+                    # fall energy disappear
+                    self.yvel = 0
+
+                # if move up
+                if yvel < 0:
+                    # stop move up
+                    self.rect.top = elem.rect.bottom
+
+                    # jump energy disappear
+                    self.yvel = 0
+
+                ## bad block
+                #if isinstance(p, self.DeathBlock) or isinstance(p, self.Monster):
+                #    self.die()
+                #
+                ## move logik into block class
+                #if hasattr(p, 'player_action'):
+                #    p.player_action(self)
+
+    def listent_event(self, event):
+        print event
 
 
     #def die(self):

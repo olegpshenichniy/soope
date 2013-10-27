@@ -42,7 +42,7 @@ class Level(object):
 
     def __init__(self, surface):
         self._bg = None
-        self._entities = pg.sprite.Group()
+        self._elements = pg.sprite.Group()
 
         # surface (main screen)
         self._surface = surface
@@ -67,16 +67,16 @@ class Level(object):
             for col in row:
                 if col == "b":
                     pf = Brick(x, y)
-                    self._entities.add(pf)
+                    self._elements.add(pf)
                 elif col == "c":
                     pf = Cloud(x, y)
-                    self._entities.add(pf)
+                    self._elements.add(pf)
                 elif col == "p":
                     pf = Pipe(x, y)
-                    self._entities.add(pf)
+                    self._elements.add(pf)
                 elif col == "s":
                     pf = Surprise(x, y)
-                    self._entities.add(pf)
+                    self._elements.add(pf)
 
                 x += Brick.WIDTH
             y += Brick.HEIGHT
@@ -87,4 +87,7 @@ class Level(object):
         self._surface.blit(self._bg, (0, 0))
 
         # draw entities
-        self._entities.draw(self._surface)
+        self._elements.draw(self._surface)
+
+    def get_elements(self):
+        return self._elements

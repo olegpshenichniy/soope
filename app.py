@@ -6,10 +6,13 @@ from level import Level
 from player.mario import Mario
 
 
-class App:
+class App(object):
     WIN_SIZE = conf.WIN_SIZE
 
     def __init__(self):
+        pg.init()
+        self.timer = pg.time.Clock()
+
         self._running = True
         self._display_surf = None
 
@@ -17,7 +20,6 @@ class App:
         self.player = None
 
     def on_init(self):
-        pg.init()
         pg.display.set_caption("PyMario")
 
         self._display_surf = pg.display.set_mode(
@@ -25,32 +27,34 @@ class App:
             pg.HWSURFACE | pg.DOUBLEBUF
         )
         self._running = True
-        
+
         # create level
         self.level = Level(self._display_surf)
 
         # create player
-        self.player = Mario(self._display_surf, 100, 100)
+        self.player = Mario(self._display_surf, 60, 60)
 
     def on_execute(self):
         if self.on_init() == False:
             self._running = False
 
-        # main loop
         while self._running:
+            self.timer.tick(conf.FPS)
             for event in pg.event.get():
                 self.on_event(event)
             self.on_loop()
             self.on_render()
 
-        self.on_cleanup()
+        self._on_cleanup()
 
     def on_event(self, event):
-        if event.type == pg.QUIT:
-            self._running = False
+        self._listent_event(event)
+        self.player.listent_event(event)
 
     def on_loop(self):
-        pass
+        # update mario
+        self.player.update(False, False, False, False,
+                           self.level.get_elements())
 
     def on_render(self):
         # render level
@@ -59,8 +63,12 @@ class App:
 
         pg.display.update()
 
-    def on_cleanup(self):
+    def _on_cleanup(self):
         pg.quit()
+
+    def _listent_event(self, event):
+        if event.type == pg.QUIT:
+            self._running = False
 
 
 if __name__ == "__main__":
