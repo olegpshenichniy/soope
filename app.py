@@ -5,7 +5,7 @@ from pygame.locals import *
 import conf
 from camera import Camera
 from level import Level
-from player.mario import Mario
+from player.player import Player
 
 
 class App(object):
@@ -17,21 +17,19 @@ class App(object):
         # joy stick
         pg.joystick.init()
         try:
-            self.joystick = pg.joystick.Joystick(0) # create a joystick instance
-            self.joystick.init() # init instance
+            self.joystick = pg.joystick.Joystick(0)
+            self.joystick.init()
             print 'Enabled joystick: ' + self.joystick.get_name()
         except pg.error:
             print 'no joystick found.'
             self.joystick = None
-
-
-        self.timer = pg.time.Clock()
 
         self._running = True
         self.display_surf = None
 
         self.level = None
         self.player = None
+        self.timer = None
 
     def on_init(self):
         pg.display.set_caption("PyMario")
@@ -42,7 +40,10 @@ class App(object):
         )
         self._running = True
 
-        # CAMERA
+        # timer fps
+        self.timer = pg.time.Clock()
+
+        # camera
         self.camera = Camera(level_width=len(Level.MAP[0]) * 30,
                              level_height=len(Level.MAP) * 30)
 
@@ -50,7 +51,7 @@ class App(object):
         self.level = Level(surface=self.display_surf, camera=self.camera)
 
         # create player
-        self.player = Mario(60, 60, surface=self.display_surf, camera=self.camera)
+        self.player = Player(60, 60, surface=self.display_surf, camera=self.camera)
 
 
     def on_execute(self):
