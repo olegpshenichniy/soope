@@ -31,7 +31,6 @@ class EventPlayer(object):
                 elif event.value[1] == 0:
                     self.events[UP] = False
 
-
             elif event.type == pg.locals.JOYBUTTONDOWN:
                 if event.button == 3:
                     self.events[UP] = True
