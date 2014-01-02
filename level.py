@@ -68,6 +68,7 @@ class Level(object):
     ]
 
     def __init__(self, surface, camera):
+
         # surface (main screen)
         self._surface = surface
         self._camera = camera
@@ -82,7 +83,9 @@ class Level(object):
         self._set_background()
 
         # create map
-        self._create_map()
+        #self._create_map()
+
+        self._play_with_pil()
 
     def _set_background(self):
         self._bg = pg.Surface(conf.WIN_SIZE)
@@ -120,3 +123,36 @@ class Level(object):
 
     def get_elements(self):
         return self._elements
+
+    def _play_with_pil(self):
+        from PIL import Image
+        from soope.conf import MEDIA_PATH
+
+        im = Image.open("{0}/level/1.png".format(MEDIA_PATH))
+        pix = im.load()
+
+        x = y = 0
+
+        for h in range(im.size[1]):
+            for w in range(im.size[0]):
+
+                if pix[w, h] == (127, 51, 0, 255):
+                    pf = Brick(x, y)
+                    self._elements.add(pf)
+
+                elif pix[w, h] == (127, 255, 255, 255):
+                    pf = Cloud(x, y)
+                    self._elements.add(pf)
+
+                elif pix[w, h] == (0, 129, 34, 255):
+                    pf = Pipe(x, y)
+                    self._elements.add(pf)
+                elif pix[w, h] == (255, 216, 0, 255):
+                    pf = Surprise(x, y)
+                    self._elements.add(pf)
+
+                x += Brick.WIDTH
+
+            y += Brick.HEIGHT
+            x = 0
+

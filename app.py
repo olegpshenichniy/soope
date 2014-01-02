@@ -44,8 +44,11 @@ class App(object):
         self.timer = pg.time.Clock()
 
         # camera
-        self.camera = Camera(level_width=len(Level.MAP[0]) * 30,
-                             level_height=len(Level.MAP) * 30)
+        # self.camera = Camera(level_width=len(Level.MAP[0]) * 30,
+        #                      level_height=len(Level.MAP) * 30)
+
+        self.camera = Camera(level_width=100 * 30,
+                             level_height=20 * 30)
 
         # create level
         self.level = Level(surface=self.display_surf, camera=self.camera)
