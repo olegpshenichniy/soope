@@ -1,5 +1,5 @@
 soope
 =====
 
-simple object oriented pygame engine
+simple object oriented pygame engine.
 Author: Oleg Pshenichniy
