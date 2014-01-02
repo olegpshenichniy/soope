@@ -53,7 +53,6 @@ class App(object):
         # create player
         self.player = Player(60, 60, surface=self.display_surf, camera=self.camera)
 
-
     def on_execute(self):
         if self.on_init() == False:
             self._running = False
@@ -68,8 +67,8 @@ class App(object):
         self._on_cleanup()
 
     def on_event(self, event):
-        self._listent_event(event)
-        self.player.listent_event(event, joystick=self.joystick)
+        self._listen_event(event)
+        self.player.listen_event(event, joystick=self.joystick)
 
     def on_loop(self):
         # center camera on player
@@ -88,7 +87,7 @@ class App(object):
     def _on_cleanup(self):
         pg.quit()
 
-    def _listent_event(self, event):
+    def _listen_event(self, event):
         if event.type == pg.QUIT:
             self._running = False
 

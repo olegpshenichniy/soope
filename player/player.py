@@ -82,6 +82,9 @@ class Player(pg.sprite.Sprite, EventPlayer, PlayerAnimation):
 
                     # fall energy disappear
                     self.yvel = 0
+                else:
+                    self.on_ground = False
+
 
                 # if move up
                 if yvel < 0:
@@ -100,7 +103,9 @@ class Player(pg.sprite.Sprite, EventPlayer, PlayerAnimation):
                 #    p.player_action(self)
 
     def update(self, platforms):
-        self.__apply_movement()
+
+        self._apply_events()
+        self._apply_animation()
 
         # move rect object
         if not self.on_ground:
@@ -121,49 +126,67 @@ class Player(pg.sprite.Sprite, EventPlayer, PlayerAnimation):
     #    self.rect.x = goX
     #    self.rect.y = goY
 
-    def __apply_movement(self):
+    def _apply_events(self):
         """
         Change player coordinate using move events.
         """
         if self.events[UP]:
             if self.on_ground:
                 self.yvel = -self.JUMP_POWER
+
                 # if running and move -> jump higher
                 if self.events[RUN] and (self.events[LEFT] or self.events[RIGHT]):
                     self.yvel -= self.JUMP_EXTRA_POWER
+
+        if self.events[LEFT]:
+            self.xvel = -self.MOVE_SPEED
+            if self.events[RUN]:
+                self.xvel -= self.MOVE_EXTRA_SPEED
+
+        if self.events[RIGHT]:
+            self.xvel = self.MOVE_SPEED
+            if self.events[RUN]:
+                self.xvel += self.MOVE_EXTRA_SPEED
+
+        if not (self.events[LEFT] or self.events[RIGHT]):
+            self.xvel = 0
+
+    def _apply_animation(self):
+        """
+        Change animation using events
+        """
+
+        if self.events[UP]:
             self.image.fill(pg.Color(self.COLOR))
             self.boltAnimJump.blit(self.image, (0, 0))
 
         if self.events[LEFT]:
-            self.xvel = -self.MOVE_SPEED
             self.image.fill(pg.Color(self.COLOR))
-            if self.events[RUN]:
-                self.xvel -= self.MOVE_EXTRA_SPEED
-                if not self.events[UP]:
-                    self.boltAnimLeftSuperSpeed.blit(self.image, (0, 0))
-            else:
-                if not self.events[UP]:
-                    self.boltAnimLeft.blit(self.image, (0, 0))
 
             if self.events[UP]:
                 self.boltAnimJumpLeft.blit(self.image, (0, 0))
+            elif self.events[RUN]:
+                self.boltAnimLeftSuperSpeed.blit(self.image, (0, 0))
+            else:
+                self.boltAnimLeft.blit(self.image, (0, 0))
 
         if self.events[RIGHT]:
-            self.xvel = self.MOVE_SPEED
             self.image.fill(pg.Color(self.COLOR))
-            if self.events[RUN]:
-                self.xvel += self.MOVE_EXTRA_SPEED
-                if not self.events[UP]:
-                    self.boltAnimRightSuperSpeed.blit(self.image, (0, 0))
-            else:
-                if not self.events[UP]:
-                    self.boltAnimRight.blit(self.image, (0, 0))
 
             if self.events[UP]:
                 self.boltAnimJumpRight.blit(self.image, (0, 0))
+            elif self.events[RUN]:
+                self.boltAnimRightSuperSpeed.blit(self.image, (0, 0))
+            else:
+                self.boltAnimRight.blit(self.image, (0, 0))
 
-        if not (self.events[LEFT] or self.events[RIGHT]):
-            self.xvel = 0
-            if not self.events[UP]:
-                self.image.fill(pg.Color(self.COLOR))
-                self.boltAnimStay.blit(self.image, (0, 0))
+        if self.is_stay:
+            self.image.fill(pg.Color(self.COLOR))
+            self.boltAnimStay.blit(self.image, (0, 0))
+
+    @property
+    def is_stay(self):
+        if self.events[LEFT] or self.events[RIGHT] or self.events[UP]:
+            return False
+        return True
+

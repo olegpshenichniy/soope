@@ -13,7 +13,7 @@ class EventPlayer(object):
     def __init__(self):
         self.events = {e: None for e in self.AVAILABLE_EVENTS}
 
-    def listent_event(self, event, joystick=None):
+    def listen_event(self, event, joystick=None):
         # JOYSTICK
         if joystick:
 
