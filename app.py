@@ -4,7 +4,7 @@ from pygame.locals import *
 
 import conf
 from camera import Camera
-from level import Level
+from level_one import Level
 from player.player import Player
 
 
