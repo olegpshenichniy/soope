@@ -17,11 +17,11 @@ class Player(pg.sprite.Sprite, EventPlayer, PlayerAnimation):
     HEIGHT = 32
     COLOR = "#888888"
 
-    MOVE_SPEED = 2.5
-    MOVE_EXTRA_SPEED = 4
-    JUMP_POWER = 10
-    JUMP_EXTRA_POWER = 4
-    GRAVITY = 0.35
+    MOVE_SPEED = 5.5
+    MOVE_EXTRA_SPEED = 9
+    JUMP_POWER = 14
+    JUMP_EXTRA_POWER = 7
+    GRAVITY = 0.5
 
     def __init__(self, x, y, surface, camera):
         EventPlayer.__init__(self)
